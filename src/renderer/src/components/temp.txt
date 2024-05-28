@@ -1,0 +1,82 @@
+<script setup>
+import { onMounted, ref } from 'vue'
+
+let bluetoothDevice = null
+const rate = ref(null)
+
+async function requestDevice() {
+  try {
+    const device = await navigator.bluetooth.requestDevice({
+      // acceptAllDevices: true
+      filters: [{ services: ['heart_rate'], name: 'HUAWEI Band HR-C8A' }]
+    })
+    // bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected)
+    // connect()
+    console.log(device)
+    const server = await device.gatt.connect()
+    const service = await server.getPrimaryService('heart_rate')
+    const characteristic = await service.getCharacteristic('heart_rate_measurement')
+    const ch = await characteristic.startNotifications()
+    ch.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+const handleCharacteristicValueChanged = (event) => {
+  const result = event.target.value.getUint8(1)
+  rate.value = result
+  console.log(result)
+}
+
+// async function setupHeartRateService(server) {
+//   const service = await server.getPrimaryService('heart_rate')
+//   const characteristic = await service.getCharacteristic('heart_rate_measurement')
+//   const ch = await characteristic.startNotifications()
+//   ch.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged)
+// }
+
+// async function connect() {
+//   await exponentialBackoff(
+//     3 /* max retries */,
+//     2 /* seconds delay */,
+//     async function toTry() {
+//       const server = await bluetoothDevice.gatt.connect()
+//       return setupHeartRateService(server)
+//     },
+//     function success() {
+//       console.log('> Bluetooth Device connected. Try disconnect it now.')
+//     },
+//     function fail() {
+//       console.log('Failed to reconnect.')
+//     }
+//   )
+// }
+
+// function onDisconnected() {
+//   console.log('> Bluetooth Device disconnected')
+// }
+
+// async function exponentialBackoff(max, delay, toTry, success, fail) {
+//   try {
+//     const result = await toTry()
+//     success(result)
+//   } catch (error) {
+//     if (max === 0) {
+//       return fail()
+//     }
+//     console.log('Retrying in ' + delay + 's... (' + max + ' tries left)')
+//     setTimeout(function () {
+//       exponentialBackoff(--max, delay * 2, toTry, success, fail)
+//     }, delay * 1000)
+//   }
+// }
+
+// onMounted(() => {
+//   console.log('mounted')
+// })
+</script>
+
+<template>
+  <button @click="requestDevice">请求</button>
+</template>
