@@ -52,7 +52,6 @@ function createWindow() {
   });
 
   ipcMain.on("ignore-mouse", (event, flag) => {
-    console.log(flag);
     const webContents = event.sender;
     const win = BrowserWindow.fromWebContents(webContents);
     win.setIgnoreMouseEvents(true);
