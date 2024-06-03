@@ -3,7 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  ignoreMouse: (flag) => ipcRenderer.send('ignore-mouse', flag)
+  ignoreMouse: () => ipcRenderer.send('ignore-mouse')
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
